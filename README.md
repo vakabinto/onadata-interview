@@ -6,7 +6,7 @@
 - [Prerequisites](#prerequisites)
 - [Setup and Deployment Steps](#setup-and-deployment-steps)
   - [1. Clone the Onadata Repository](#1-clone-the-onadata-repository)
-  - [2. Configure and Deploy Onadata as a Docker Container](#2-configure-and-deploy-onadata-as-a-docker-container)
+  - [2. Configure and Deploy Onadata using Docker Compose](#2-configure-and-deploy-onadata-using-docker-compose)
   - [3. Build and Push Docker Image to Docker Hub](#3-build-and-push-docker-image-to-docker-hub)
   - [4. Setup GitLab CI/CD Pipeline](#4-setup-gitlab-cicd-pipeline)
   - [5. Deploy the Onadata App on an Ubuntu Server](#5-deploy-the-onadata-app-on-an-ubuntu-server)
@@ -37,16 +37,25 @@ git clone https://github.com/vakabinto/onadata.git
 cd onadata
 ```
 
-### 2. Configure and Deploy Onadata as a Docker Container
+### 2. Configure and Deploy Onadata using Docker Compose
+If the repository contains a `docker-compose.yml` file, use the following command to start the application:
 ```sh
-docker build -t onadata:latest .
-docker run -d --name onadata-container -p 8000:8000 onadata:latest
+docker-compose up -d --build
+```
+To check running containers:
+```sh
+docker ps
+```
+To stop the containers:
+```sh
+docker-compose down
 ```
 
 ### 3. Build and Push Docker Image to Docker Hub
 ```sh
 docker login -u your_dockerhub_username -p your_dockerhub_password
-docker tag onadata:latest your_dockerhub_username/onadata:latest
+docker-compose build
+docker tag onadata_app your_dockerhub_username/onadata:latest
 docker push your_dockerhub_username/onadata:latest
 ```
 
@@ -64,17 +73,17 @@ test:
 
 deploy:
   script:
-    - docker stop onadata-container || true
-    - docker rm onadata-container || true
+    - docker-compose down || true
     - docker pull your_dockerhub_username/onadata:latest
-    - docker run -d --name onadata-container -p 8000:8000 your_dockerhub_username/onadata:latest
+    - docker-compose up -d
 ```
 
 ### 5. Deploy the Onadata App on an Ubuntu Server
 ```sh
 ssh user@your-server-ip
-sudo docker pull your_dockerhub_username/onadata:latest
-sudo docker run -d --name onadata-container -p 8000:8000 your_dockerhub_username/onadata:latest
+sudo docker login -u your_dockerhub_username -p your_dockerhub_password
+sudo docker-compose pull
+sudo docker-compose up -d
 ```
 
 ### 6. Configure Nginx Web Server
